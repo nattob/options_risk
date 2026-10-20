@@ -1,5 +1,7 @@
 notes.txt
 .vscode/
+main
+main.dSYM/
 .clang-format
 .clang-tidy
 build/
