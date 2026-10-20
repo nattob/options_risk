@@ -5,7 +5,7 @@ Delta - reprsents the change in price of on option resulting from the change in 
         towards 1 (-1) as the option gets deeper in the money, and closer to 0 as it gets further out of the money.
     --> Delta also gives an indication of the likelihood of an option expiring in the money; an option with 
         a delta of 0.7 has a roughly 70% chance of expiring in the money.
-Gamma - the change in the delta of the option in response to a change in price of the underlying  asset.
+Gamma - the change in the delta of the option in response to a change in price of the underlying asset.
     --> second derivitave of the Delta
     --> The higher the value of gamma, the more sensitive the option’s delta to price changes in the 
         underlying asset. 
@@ -21,28 +21,31 @@ Vega - the rate of change in the price of the option due to a change in implied 
 Rho - the change in price of an option relative to a change in the interest rate
     --> an increase in interest rates increases the value of call options (opposite for puts)
 */
+#include <cmath>
+#include <numbers>
 
 #include "BlackScholes.h"
 #include "Greeks.h"
 
+
+static double Greeks_NormPDF(double x) {
+    return std::exp(-0.5 * x * x) / std::sqrt(2 * std::numbers::pi);
+}
+
 Greeks CalculateGreeksCall(double S, double K, double r, double v, double T)
 {
 
-    const double dS = 0.01 * S; // 1% change in the underlying asset price
-    const double dv = 0.0001; // 0.01 vol point
-    const double dr = 0.0001; // 1 basis point change in interest rate
-    const double dT = 1.0 / 365.0; // 1 day change in time to maturity
-
-    const double price = BlackScholes_Call(S, K, r, v, T);
-    const double priceUp = BlackScholes_Call(S + dS, K, r, v, T);
-    const double priceDown = BlackScholes_Call(S - dS, K, r, v, T);
+    const double sqrtT = std::sqrt(T);
+    const double d1 = BlackScholes_d1(S, K, r, v, T);
+    const double d2 = d1 - v * sqrtT;
+    const double discK = K * std::exp(-r * T); 
 
     Greeks greeks;
-    greeks.delta = (priceUp - priceDown) / (2 * dS);
-    greeks.gamma = (priceUp - 2 * price + priceDown) / (dS * dS);
-    greeks.theta = (BlackScholes_Call(S, K, r, v, T - dT) - price) / dT;
-    greeks.vega = (BlackScholes_Call(S, K, r, v + dv, T) - BlackScholes_Call(S, K, r, v - dv, T)) / (2 * dv);
-    greeks.rho = (BlackScholes_Call(S, K, r + dr, v, T) - BlackScholes_Call(S, K, r - dr, v, T)) / (2 * dr);
+    greeks.delta = BlackScholes_NormCDF(d1);
+    greeks.gamma = Greeks_NormPDF(d1) / (S * v * sqrtT);
+    greeks.theta = -S * Greeks_NormPDF(d1) * v / (2 * sqrtT) - r * discK * BlackScholes_NormCDF(d2);
+    greeks.vega = S * Greeks_NormPDF(d1) * sqrtT;
+    greeks.rho = discK * T * BlackScholes_NormCDF(d2);
 
     return greeks;
 }
