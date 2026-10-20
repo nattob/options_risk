@@ -1,2 +1,6 @@
 notes.txt
 .vscode/
+.clang-format
+.clang-tidy
+build/
+CMakeLists.txt
