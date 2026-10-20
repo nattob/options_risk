@@ -23,16 +23,7 @@ Rho - the change in price of an option relative to a change in the interest rate
 */
 
 #include "BlackScholes.h"
-
-
-struct Greeks
-{
-    double delta;
-    double gamma;
-    double theta;
-    double vega;
-    double rho;
-};
+#include "Greeks.h"
 
 Greeks CalculateGreeksCall(double S, double K, double r, double v, double T, const double change)
 {

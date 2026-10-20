@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include "BlackScholes.h"
+#include "Greeks.h"
 
 int main() 
 {
@@ -14,6 +15,8 @@ int main()
     // Calculate option prices
     double call_price = BlackScholes_Call(S, K, r, v, T);
     double put_price = BlackScholes_Put(S, K, r, v, T);
+    
+    Greeks greeksCall = CalculateGreeksCall(S, K, r, v, T, 0.5);
 
     // Output results
     std::cout << std::fixed << std::setprecision(5);
@@ -24,8 +27,16 @@ int main()
     std::cout << "Volatility (v)      : " << v << std::endl;
     std::cout << "Maturity (T)        : " << T << " year(s)" << std::endl;
     std::cout << "------------------------------------" << std::endl;
-    std::cout << "Call Option Price   : " << call_price << std::endl; // Expected ~10.45058
-    std::cout << "Put Option Price    : " << put_price << std::endl;  // Expected ~5.57352
+
+    std::cout << "Call Option Price   : " << call_price << std::endl;
+    std::cout << "Put Option Price    : " << put_price << std::endl;
+    std::cout << "------------------------------------" << std::endl;
+
+    std::cout << "Delta              : " << greeksCall.delta << std::endl;
+    std::cout << "Gamma              : " << greeksCall.gamma << std::endl;
+    std::cout << "Theta              : " << greeksCall.theta << std::endl;
+    std::cout << "Vega               : " << greeksCall.vega << std::endl;
+    std::cout << "Rho                : " << greeksCall.rho << std::endl;
 
     return 0;
 }
