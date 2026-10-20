@@ -25,22 +25,24 @@ Rho - the change in price of an option relative to a change in the interest rate
 #include "BlackScholes.h"
 #include "Greeks.h"
 
-Greeks CalculateGreeksCall(double S, double K, double r, double v, double T, const double change)
+Greeks CalculateGreeksCall(double S, double K, double r, double v, double T)
 {
 
-    double price = BlackScholes_Call(S, K, r, v, T);
-    double priceUp = BlackScholes_Call(S + change, K, r, v, T);
-    double priceDown = BlackScholes_Call(S - change, K, r, v, T);
-    double priceT = BlackScholes_Call(S, K, r, v, T - change / 365);
-    double priceV = BlackScholes_Call(S, K, r, v + change, T);
-    double priceR = BlackScholes_Call(S, K, r + change, v, T);
+    const double dS = 0.01 * S; // 1% change in the underlying asset price
+    const double dv = 0.0001; // 0.01 vol point
+    const double dr = 0.0001; // 1 basis point change in interest rate
+    const double dT = 1.0 / 365.0; // 1 day change in time to maturity
+
+    const double price = BlackScholes_Call(S, K, r, v, T);
+    const double priceUp = BlackScholes_Call(S + dS, K, r, v, T);
+    const double priceDown = BlackScholes_Call(S - dS, K, r, v, T);
 
     Greeks greeks;
-    greeks.delta = (priceUp - priceDown) / (2 * change);
-    greeks.gamma = (priceUp - 2 * price + priceDown) / (change * change);
-    greeks.theta = -(priceT - price) / (change / 365);
-    greeks.vega = (priceV - price) / change;
-    greeks.rho = (priceR - price) / change;
+    greeks.delta = (priceUp - priceDown) / (2 * dS);
+    greeks.gamma = (priceUp - 2 * price + priceDown) / (dS * dS);
+    greeks.theta = (BlackScholes_Call(S, K, r, v, T - dT) - price) / dT;
+    greeks.vega = (BlackScholes_Call(S, K, r, v + dv, T) - BlackScholes_Call(S, K, r, v - dv, T)) / (2 * dv);
+    greeks.rho = (BlackScholes_Call(S, K, r + dr, v, T) - BlackScholes_Call(S, K, r - dr, v, T)) / (2 * dr);
 
     return greeks;
 }
