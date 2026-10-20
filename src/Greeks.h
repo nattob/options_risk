@@ -9,4 +9,4 @@ struct Greeks
     double rho;
 };
 
-Greeks CalculateGreeksCall(double S, double K, double r, double v, double T);
+Greeks CalculateGreeksCall( double S, double K, double r, double v, double T );
